@@ -209,15 +209,21 @@ export default function Dashboard() {
           "Duty Started"
         );
 
-      } catch (error) {
+      } catch (error: any) {
 
         console.log(
-          error
+          "START DUTY ERROR:"
         );
 
+        console.log(error);
+
         Alert.alert(
-          "Error",
-          "Unable To Start Duty"
+          "START DUTY ERROR",
+          JSON.stringify(
+            error?.message ||
+            error?.response?.data ||
+            error
+          )
         );
 
       } finally {
