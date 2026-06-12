@@ -1,21 +1,26 @@
 import React, {
-    useEffect,
-    useRef,
-    useState,
+  useEffect,
+  useRef,
+  useState,
 } from "react";
 
 import {
-    Alert,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Alert,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import * as Location from "expo-location";
 import { router } from "expo-router";
+
+import {
+  startBackgroundTracking,
+  stopBackgroundTracking,
+} from "../services/locationService";
 
 export default function Dashboard() {
 
@@ -44,7 +49,6 @@ export default function Dashboard() {
       if (
         locationSubscription.current
       ) {
-
         locationSubscription.current.remove();
       }
     };
@@ -62,7 +66,6 @@ export default function Dashboard() {
       if (
         storedUser
       ) {
-
         setUser(
           JSON.parse(
             storedUser
@@ -82,14 +85,13 @@ export default function Dashboard() {
       if (
         storedAttendance
       ) {
-
         setAttendanceId(
           storedAttendance
         );
       }
     };
 
-  const startLocationTracking =
+  const startLiveTracking =
     async (
       attendanceIdValue: string,
       employeeId: string
@@ -102,12 +104,6 @@ export default function Dashboard() {
         permission.status !==
         "granted"
       ) {
-
-        Alert.alert(
-          "Permission Denied",
-          "Location Permission Required"
-        );
-
         return;
       }
 
@@ -116,8 +112,12 @@ export default function Dashboard() {
           {
             accuracy:
               Location.Accuracy.High,
-            timeInterval: 10000,
-            distanceInterval: 10,
+
+            timeInterval:
+              10000,
+
+            distanceInterval:
+              10,
           },
 
           async (
@@ -157,9 +157,7 @@ export default function Dashboard() {
                 }
               );
 
-            } catch (
-              error
-            ) {
+            } catch (error) {
 
               console.log(
                 error
@@ -199,14 +197,16 @@ export default function Dashboard() {
           id
         );
 
-        await startLocationTracking(
+        await startBackgroundTracking();
+
+        await startLiveTracking(
           id,
           user._id
         );
 
         Alert.alert(
           "Success",
-          "Duty Started Successfully"
+          "Duty Started"
         );
 
       } catch (error) {
@@ -242,10 +242,11 @@ export default function Dashboard() {
           }
         );
 
+        await stopBackgroundTracking();
+
         if (
           locationSubscription.current
         ) {
-
           locationSubscription.current.remove();
         }
 
